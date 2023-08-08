@@ -23,30 +23,48 @@ How variable is relationship importance within cultures? Across cultures? Indivi
 library(dplyr)
 library(tidyverse)
 data<-read.csv("df.all_long_usacn.csv")
-
-## 0.
 data$relationship <- gsub("acquaintances", "acq", data$relationship, ignore.case = TRUE)
+```
 
 ## 1.
+```{r}
 dataRelImp<-data[,c(1:3,10)]
 isoRelImp <- dataRelImp %>%
   distinct(subject, relationship_imp, relationship, culture, .keep_all = TRUE)
+```
 
 ## 2.
+```{r}
 anova_isoRelImp<-aov(relationship_imp~relationship*culture,data=isoRelImp)
 summary(anova_isoRelImp)
+```
 
 ## 3.
+```{r}
 library(emmeans)
 posthoc<-emmeans(anova_isoRelImp,pairwise~culture|relationship)
 summary(posthoc)
+```
 
 ## 4. 
+```{r}
 graphRelImp<-ggplot(data=isoRelImp,
                 aes(x=relationship,
                     y=relationship_imp,
-                    fill= relationship))
-
+                    fill= culture))+
+  stat_summary(fun="mean",
+               geom="bar",
+               position=position_dodge(width=0.9))+
+  stat_summary(fun.data = "mean_se",
+    geom = "errorbar",
+    width = 0.25,
+    position = position_dodge(width = 0.8)
+  ) +
+  labs(title = "Average Relationship Importance by Culture and Relationship",
+       x = "Relationship Type",
+       y = "Self-reported Relationship Importance") +
+  theme_minimal()
+graphRelImp
 ```
 
 
