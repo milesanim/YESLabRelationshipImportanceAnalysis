@@ -1,0 +1,54 @@
+---
+title: "A Brief Cross-Cultural Study on the Importance of Relationships"
+author: "Miles Anim-Appiah"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+I will be using YES Lab data pertaining to function weakening actions that inform the relational dynamics in a series of hypothetical relationships.
+
+How variable is relationship importance within cultures? Across cultures? Individuals from American and Chinese samples rated the importance of various relationships from 1 (not important) to 100 (very important)
+
+1. isolate values for relationship importance for each subject
+2. 2x2 anova, output variable relationship importance, predictor variables are relationship type and culture, examine main effect of relationship, culture
+3. posthoc t-test, examine differences in relationship importance between cultures
+4. bar graph, x-axis relationship, y-axis relationship importance, bars colored by culture
+
+
+```{r}
+library(dplyr)
+library(tidyverse)
+data<-read.csv("df.all_long_usacn.csv")
+
+## 0.
+data$relationship <- gsub("acquaintances", "acq", data$relationship, ignore.case = TRUE)
+
+## 1.
+dataRelImp<-data[,c(1:3,10)]
+isoRelImp <- dataRelImp %>%
+  distinct(subject, relationship_imp, relationship, culture, .keep_all = TRUE)
+
+## 2.
+anova_isoRelImp<-aov(relationship_imp~relationship*culture,data=isoRelImp)
+summary(anova_isoRelImp)
+
+## 3.
+library(emmeans)
+posthoc<-emmeans(anova_isoRelImp,pairwise~culture|relationship)
+summary(posthoc)
+
+## 4. 
+graphRelImp<-ggplot(data=isoRelImp,
+                aes(x=relationship,
+                    y=relationship_imp,
+                    fill= relationship))
+
+```
+
+
+
+
